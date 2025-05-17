@@ -3,14 +3,16 @@ import streamlit as st
 st.title("Reverse Engineering our Savings")
 
 # ---- USER INPUTS ----
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     FV = st.number_input("Desired amount (EUR)", min_value = 0)
 with col2:    
     r = st.number_input("Annual expected interest rate", min_value = 0)
-    t = st.number_input("Number of years you are planning to save", min_value = 0)
+with col3:
+    t = st.number_input("Number of years to save", min_value = 0)
 
+@st.cache_data
 def reverse_engineer_fixed_amount(FV: float, r: float, t: int) -> float:
 
     # compounding perioids per year
@@ -23,4 +25,9 @@ def reverse_engineer_fixed_amount(FV: float, r: float, t: int) -> float:
 
 if t:
     P = reverse_engineer_fixed_amount(FV=FV, r=r, t=t)
-    st.write(f"`{P:.2f}`")
+
+    # need to use index because technically, st.columns
+    # returns a list
+    col1 = st.columns(1)[0]
+    col1.metric("Fixed Monthly Amount Needed", f"€{P:.2f}")
+    
