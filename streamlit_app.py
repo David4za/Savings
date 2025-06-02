@@ -15,10 +15,16 @@ reverse_plan = st.Page(
     icon= ":material/local_atm:"
 )
 
+withdraw_plan = st.Page(
+    page=r"pages/withdraw.py",
+    title="Withdraw Plan",
+    icon=":material/payments:"
+)
+
 # ---- PAGE NAVIGATION ----
 
 pg = st.navigation({
-    "Plans":[fixed_plan, reverse_plan]
+    "Plans":[fixed_plan, reverse_plan, withdraw_plan]
 })
 
 pg.run()

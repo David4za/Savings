@@ -7,14 +7,16 @@ from millify import millify
 st.title("Savings Plan")
 
 # ---- USER INPUTS ----
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    P = st.number_input("Fixed amount to save per month (EUR)", min_value = 0)
-    L = st.number_input("Lump Sum Amount (EUR)", min_value=0)
+    P = st.number_input("Fixed amount to save per month", value=400, min_value = 0, )
+    L = st.number_input("Lump Sum Amount", min_value=0)
 with col2:    
-    r = st.number_input("Annual expected interest rate", min_value = 0)
-    t = st.number_input("Number of years you are planning to save", min_value = 0)
+    r = st.number_input("Annual expected interest rate", value=5, min_value = 0)
+    t = st.number_input("Number of years", value=30, min_value = 0)
+with col3:
+    inflation = st.number_input("Annual inflationrate", value=2,  min_value= 1)
 
 # ---- The Math -----
 
@@ -43,6 +45,12 @@ def future_value_annuity(P: float, L: float, r: float, t: int) -> pd.DataFrame:
 
     return pd.DataFrame(values)
 
+# ajdust for inflation
+@st.cache_data
+def inflation_adjustment(total_savings: float, inflation_rate: float, t: int) -> float:
+    infla_rate = inflation_rate/100
+    return total_savings / ((1 + infla_rate)**t)
+
 # ---- Calculations and Display ----
 if st.button("Calculate"):
     df = future_value_annuity(P=P, L=L, r=r, t=t)
@@ -50,12 +58,17 @@ if st.button("Calculate"):
         total_fv = df.loc[df.index[-1], "Total FV"]
         total_contrib = P * 12 * t + L # value without interest
         total_interest = total_fv - total_contrib
+        
+        adjusted_savings = inflation_adjustment(total_savings=total_fv,
+                                                inflation_rate=inflation,
+                                                t=t)
 
     # ---- Metric Values ----
-        col_1, col_2, col_3 = st.columns(3)
-        col_1.metric("Total savings", f"€{millify(total_fv)}")
+        col_1, col_2, col_3, col_4 = st.columns(4)
+        col_1.metric("Total Savings", f"€{millify(total_fv)}")
         col_2.metric("Total Contributions", f"{millify(total_contrib)}")
         col_3.metric("Total Interest Earned", f"{millify(total_interest)}")
+        col_4.metric("Adjusted for Inflation", f"€{millify(adjusted_savings)}")
 
     # ---- Graph ----
         fig_1 = px.line(
