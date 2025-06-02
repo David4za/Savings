@@ -4,7 +4,7 @@ import plotly.express as px
 
 from millify import millify
 
-st.title("Withdrawl Plan")
+st.title("Withdraw Plan")
 
 col1, col2, col3 = st.columns(3)
 
