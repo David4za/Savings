@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -31,7 +32,7 @@ def withdraw_analysis(monthly_withdraw: float,
 
 
     while balance >= monthly_withdraw:
-        if months >= 600:
+        if months >= 900:
             break
         else:
                 
@@ -42,10 +43,12 @@ def withdraw_analysis(monthly_withdraw: float,
                 "Month": months,
                 "Balance":balance})
 
-    
+        df = pd.DataFrame(balances)
+        df['Year'] = np.floor(df['Month'] / 12).astype(int) + 1
+        df = df.groupby('Year').agg({'Balance':'last'}).reset_index()
     #adjusted_balance = [b / ((1 + inflation_dec) ** (month/12)) for month, b in enumerate(balances)]
 
-    return pd.DataFrame(balances)
+    return df
 
 # ---------- Page -----------
 if st.button("Calculate"):
@@ -55,22 +58,20 @@ if st.button("Calculate"):
                            inflation=inflation)
     
     if not df.empty:
-        total_months = df.loc[df.index[-1], "Month"]
-        total_years = total_months / 12
-        total_withdraw = withdraw * total_months
+        total_years = df.loc[df.index[-1], "Year"]
+        total_withdraw = (withdraw * total_years) * 12
 
         col_1, col_2 = st.columns(2)
         
         col_1.metric("Total Years", f"{millify(total_years)}")
-        col_2.metric("Total Withdrawn", f"{total_withdraw}")
+        col_2.metric("Total Withdrawn", f"{millify(total_withdraw)}")
 
         fig_1 = px.line(
             df,
-            x = "Month",
+            x = "Year",
             y = "Balance",
             markers=True,
-            title="Balance by month"
+            title="Balance by Year"
         )
 
         st.plotly_chart(fig_1, use_container_width=True)
-    
