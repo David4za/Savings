@@ -59,7 +59,7 @@ if st.button("Calculate"):
     
     if not df.empty:
         total_years = df.loc[df.index[-1], "Year"]
-        total_withdraw = (withdraw * total_years)
+        total_withdraw = ((withdraw * 12) * total_years)
 
         col_1, col_2 = st.columns(2)
         
