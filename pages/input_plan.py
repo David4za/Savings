@@ -20,7 +20,7 @@ with col3:
 
 # ---- The Math -----
 
-# cahce decorator makes recalculation faster
+# cache decorator makes recalculation faster
 @st._cache_data
 def future_value_annuity(P: float, L: float, r: float, t: int) -> pd.DataFrame:
     """

@@ -32,7 +32,7 @@ def withdraw_analysis(monthly_withdraw: float,
 
 
     while balance >= monthly_withdraw:
-        if months >= 900:
+        if months >= 1200:
             break
         else:
                 
@@ -46,7 +46,7 @@ def withdraw_analysis(monthly_withdraw: float,
         df = pd.DataFrame(balances)
         df['Year'] = np.floor(df['Month'] / 12).astype(int) + 1
         df = df.groupby('Year').agg({'Balance':'last'}).reset_index()
-    #adjusted_balance = [b / ((1 + inflation_dec) ** (month/12)) for month, b in enumerate(balances)]
+        df['Adjusted Balance'] = df['Balance'] / (1 + inflation_dec)** df['Year']
 
     return df
 
@@ -69,9 +69,10 @@ if st.button("Calculate"):
         fig_1 = px.line(
             df,
             x = "Year",
-            y = "Balance",
+            y = ["Balance", "Adjusted Balance"],
             markers=True,
-            title="Balance by Year"
+            title="Balance by Year",
+            color_discrete_sequence = ["#00BB88", "#FF0000"]
         )
 
         st.plotly_chart(fig_1, use_container_width=True)
