@@ -60,21 +60,32 @@ with st.container():
 
 # ---- The Math -----
 
+def effective_monthly_rate(annual_rate: float) -> float:
+    """Convert an effective annual return into an equivalent monthly return."""
+    return (1 + annual_rate / 100) ** (1 / 12) - 1
+
+
 # cache decorator makes recalculation faster
-@st._cache_data
+@st.cache_data
 def future_value_annuity(P: float, L: float, r: float, t: int) -> pd.DataFrame:
     """
-    Takes the user inputs and based on that and a compounding
-    period of 12 (months per year) give the Future Value
+    Takes the user inputs and returns future value by year.
+
+    Assumes the annual rate is an effective annual return, the lump sum is
+    invested immediately, and fixed monthly savings are added at month-end.
     """
-    # compounding perioids per year
-    n = 12
-    r_decimal = r/100
+    periods_per_year = 12
+    monthly_rate = effective_monthly_rate(r)
     values = []
 
     for year in range(1, t+1):
-        FV = P * ((1 + r_decimal/n)**(n*year) -1) / (r_decimal/n) if r_decimal > 0 else P * n * year
-        FV_L = L * (1 + r_decimal/n)**(n*year) if r_decimal > 0 else L
+        periods = periods_per_year * year
+        FV = (
+            P * ((1 + monthly_rate) ** periods - 1) / monthly_rate
+            if monthly_rate > 0
+            else P * periods
+        )
+        FV_L = L * (1 + monthly_rate) ** periods if monthly_rate > 0 else L
         total = FV + FV_L
         values.append({
             "Year":year,
