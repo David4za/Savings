@@ -9,6 +9,12 @@ from pages.calculations.future_savings import (
     total_contributions,
 )
 from pages.charts.savings_charts import savings_over_time_chart
+from pages.components.summary_cards import (
+    inject_summary_styles,
+    summary_card,
+    summary_grid_spacer,
+)
+
 
 st.set_page_config(
     page_title="Future Savings Planner",
@@ -146,11 +152,44 @@ if st.button("Calculate", type="primary"):
     # ---- Metric Values ----
         st.markdown("### Summary")
         st.caption("Key figure overview at the end of the savings term")
+        inject_summary_styles()
+        interest_share = total_interest / total_fv if total_fv else 0
+        inflation_gap = total_fv - adjusted_savings
+        lump_sum_total = sum(amount for amount, _ in lump_sums_for_calculation)
+        summary_grid_spacer()
         with st.container():
             col_1, col_2, col_3, col_4 = st.columns(4)
-            col_1.metric("Total Savings", f"€{millify(total_fv)}")
-            col_2.metric("Total Contributions", f"{millify(total_contrib)}")
-            col_3.metric("Total Interest Earned", f"{millify(total_interest)}")
-            col_4.metric("Adjusted for Inflation", f"€{millify(adjusted_savings)}")
+            with col_1:
+                summary_card(
+                    "Total Savings",
+                    f"€{millify(total_fv)}",
+                    f"Projected balance after {t} years",
+                    "#00A878",
+                    "linear-gradient(135deg, #DDF9EC 0%, #F7FFFB 100%)",
+                )
+            with col_2:
+                summary_card(
+                    "Total Contributions",
+                    f"€{millify(total_contrib)}",
+                    f"Includes €{millify(lump_sum_total)} in lump sums",
+                    "#2D9CDB",
+                    "linear-gradient(135deg, #E2F3FF 0%, #F8FCFF 100%)",
+                )
+            with col_3:
+                summary_card(
+                    "Interest Earned",
+                    f"€{millify(total_interest)}",
+                    f"{interest_share:.0%} of the final balance",
+                    "#F2994A",
+                    "linear-gradient(135deg, #FFF0DD 0%, #FFFBF6 100%)",
+                )
+            with col_4:
+                summary_card(
+                    "Inflation Adjusted",
+                    f"€{millify(adjusted_savings)}",
+                    f"€{millify(inflation_gap)} estimated purchasing-power drag",
+                    "#EB5757",
+                    "linear-gradient(135deg, #FFE8E8 0%, #FFFAFA 100%)",
+                )
         fig_1 = savings_over_time_chart(df)
         st.plotly_chart(fig_1, use_container_width=True)

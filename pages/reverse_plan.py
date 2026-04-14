@@ -1,6 +1,13 @@
 import streamlit as st
 
+from millify import millify
+
 from pages.calculations.reverse_savings import reverse_engineer_fixed_amount
+from pages.components.summary_cards import (
+    inject_summary_styles,
+    summary_card,
+    summary_grid_spacer,
+)
 
 st.title("Reverse Engineer Savings")
 
@@ -33,9 +40,43 @@ if st.button("Analyse"):
             annual_rate=r,
             years=t,
         )
+        total_contributions = P * 12 * t
 
-        # need to use index because technically, st.columns
-        # returns a list
-        col1 = st.columns(1)[0]
-        col1.metric("Fixed Monthly Amount Needed", f"€{P:.2f}")
+        st.markdown("### Summary")
+        st.caption("Monthly savings needed to reach the target amount")
+        inject_summary_styles()
+        summary_grid_spacer()
+        col_1, col_2, col_3, col_4 = st.columns(4)
+        with col_1:
+            summary_card(
+                "Monthly Needed",
+                f"€{P:.2f}",
+                "Fixed amount to save each month",
+                "#00A878",
+                "linear-gradient(135deg, #DDF9EC 0%, #F7FFFB 100%)",
+            )
+        with col_2:
+            summary_card(
+                "Target Amount",
+                f"€{millify(FV)}",
+                f"Goal after {t} years",
+                "#2D9CDB",
+                "linear-gradient(135deg, #E2F3FF 0%, #F8FCFF 100%)",
+            )
+        with col_3:
+            summary_card(
+                "Total Saved",
+                f"€{millify(total_contributions)}",
+                "Cash contributed before growth",
+                "#F2994A",
+                "linear-gradient(135deg, #FFF0DD 0%, #FFFBF6 100%)",
+            )
+        with col_4:
+            summary_card(
+                "Expected Return",
+                f"{r}%",
+                "Annual compounding assumption",
+                "#EB5757",
+                "linear-gradient(135deg, #FFE8E8 0%, #FFFAFA 100%)",
+            )
     
