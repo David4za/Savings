@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 st.title("Future Savings Planner")
-st.caption("Play with monthly savings, lumpsums, interest rates etc to see how your wealth can grow.")
+st.caption("Play with monthly savings, lump sums, interest rates etc to see how your wealth can grow.")
 
 # ---- USER INPUTS ----
 with st.container():
@@ -28,12 +28,6 @@ with st.container():
                 min_value = 0,
                 step=50,
                 help="How much do you plan to save monthly"
-                )
-            L = st.number_input(
-                "Lump Sum Amount", 
-                min_value=0,
-                step=500,
-                help="Any amount you want to also add in the investment pool"
                 )
         with col2:    
             r = st.number_input(
@@ -57,6 +51,38 @@ with st.container():
                 max_value=15,
                 help="Used to calculate inflation-adjust value (Governemnts aim for 2% p/y)"
                 )
+        st.markdown("#### Lump sums")
+        st.caption("Add optional one-off deposits. A lump sum added after 20 years in a 30-year plan grows for the final 10 years.")
+        lump_sum_count = st.number_input(
+            "Number of lump sums",
+            value=1,
+            min_value=0,
+            max_value=20,
+            step=1,
+            help="Set this to 0 if you do not plan any one-off deposits.",
+        )
+        lump_sums = []
+
+        for lump_sum_index in range(lump_sum_count):
+            amount_col, year_col = st.columns(2)
+            with amount_col:
+                lump_sum_amount = st.number_input(
+                    f"Lump sum {lump_sum_index + 1} amount",
+                    min_value=0,
+                    step=500,
+                    key=f"lump_sum_amount_{lump_sum_index}",
+                )
+            with year_col:
+                years_from_now = st.number_input(
+                    f"Add after year",
+                    min_value=0,
+                    max_value=t,
+                    step=1,
+                    key=f"lump_sum_year_{lump_sum_index}",
+                    help="Use 0 if this amount is invested today.",
+                )
+            if lump_sum_amount > 0:
+                lump_sums.append((float(lump_sum_amount), int(years_from_now)))
 
 # ---- The Math -----
 
@@ -67,12 +93,18 @@ def effective_monthly_rate(annual_rate: float) -> float:
 
 # cache decorator makes recalculation faster
 @st.cache_data
-def future_value_annuity(P: float, L: float, r: float, t: int) -> pd.DataFrame:
+def future_value_annuity(
+    P: float,
+    lump_sums: tuple[tuple[float, int], ...],
+    r: float,
+    t: int
+) -> pd.DataFrame:
     """
     Takes the user inputs and returns future value by year.
 
-    Assumes the annual rate is an effective annual return, the lump sum is
-    invested immediately, and fixed monthly savings are added at month-end.
+    Assumes the annual rate is an effective annual return, lump sums are
+    invested at their chosen year, and fixed monthly savings are added at
+    month-end.
     """
     periods_per_year = 12
     monthly_rate = effective_monthly_rate(r)
@@ -85,7 +117,16 @@ def future_value_annuity(P: float, L: float, r: float, t: int) -> pd.DataFrame:
             if monthly_rate > 0
             else P * periods
         )
-        FV_L = L * (1 + monthly_rate) ** periods if monthly_rate > 0 else L
+        FV_L = 0
+        for amount, years_from_now in lump_sums:
+            lump_sum_periods = periods - years_from_now * periods_per_year
+            if lump_sum_periods < 0:
+                continue
+            FV_L += (
+                amount * (1 + monthly_rate) ** lump_sum_periods
+                if monthly_rate > 0
+                else amount
+            )
         total = FV + FV_L
         values.append({
             "Year":year,
@@ -107,10 +148,12 @@ if st.button("Calculate", type="primary"):
     with st.spinner("Calculating ..."):
         time.sleep(1)
         st.success("Calculations complete!")
-    df = future_value_annuity(P=P, L=L, r=r, t=t)
+    lump_sums_for_calculation = tuple(lump_sums)
+    df = future_value_annuity(P=P, lump_sums=lump_sums_for_calculation, r=r, t=t)
     if not df.empty:
         total_fv = df.loc[df.index[-1], "Total FV"]
-        total_contrib = P * 12 * t + L # value without interest
+        total_lump_sum_contrib = sum(amount for amount, _ in lump_sums_for_calculation)
+        total_contrib = P * 12 * t + total_lump_sum_contrib # value without interest
         total_interest = total_fv - total_contrib
         
         adjusted_savings = inflation_adjustment(total_savings=total_fv,
