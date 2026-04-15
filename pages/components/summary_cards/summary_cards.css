@@ -3,9 +3,14 @@
 }
 
 .summary-card {
+    --summary-bg: var(--background-color, #FFFFFF);
+    --summary-surface: var(--secondary-background-color, #F8FAFC);
+    --summary-text: var(--text-color, #111827);
+    --summary-muted: rgba(17, 24, 39, 0.7);
+    --summary-faint: rgba(17, 24, 39, 0.08);
     min-height: 152px;
     padding: 1.15rem 1.1rem;
-    border: 1px solid rgba(17, 24, 39, 0.08);
+    border: 1px solid var(--summary-faint);
     border-radius: 8px;
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.54)),
@@ -13,6 +18,34 @@
     box-shadow: 0 16px 34px rgba(17, 24, 39, 0.08);
     position: relative;
     overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    .summary-card {
+        --summary-bg: var(--background-color, #0E1117);
+        --summary-surface: var(--secondary-background-color, #1F2937);
+        --summary-text: var(--text-color, #FAFAFA);
+        --summary-muted: rgba(250, 250, 250, 0.72);
+        --summary-faint: rgba(250, 250, 250, 0.12);
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+            linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(17, 24, 39, 0.92));
+        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+    }
+}
+
+@supports (background: color-mix(in srgb, #000 50%, #fff)) {
+    .summary-card {
+        --summary-muted: color-mix(in srgb, var(--summary-text) 68%, transparent);
+        --summary-faint: color-mix(in srgb, var(--summary-text) 10%, transparent);
+        background:
+            linear-gradient(
+                145deg,
+                color-mix(in srgb, var(--accent-color) 11%, var(--summary-surface)),
+                color-mix(in srgb, var(--accent-color) 3%, var(--summary-bg))
+            );
+        box-shadow: 0 16px 34px color-mix(in srgb, var(--summary-text) 8%, transparent);
+    }
 }
 
 .summary-card::before {
@@ -36,7 +69,7 @@
 }
 
 .summary-card__label {
-    color: rgba(17, 24, 39, 0.64);
+    color: var(--summary-muted);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0;
@@ -44,7 +77,7 @@
 }
 
 .summary-card__value {
-    color: #111827;
+    color: var(--summary-text);
     font-size: 2rem;
     font-weight: 800;
     line-height: 1.08;
@@ -53,7 +86,7 @@
 }
 
 .summary-card__detail {
-    color: rgba(17, 24, 39, 0.7);
+    color: var(--summary-muted);
     font-size: 0.9rem;
     line-height: 1.35;
     margin-top: 0.72rem;

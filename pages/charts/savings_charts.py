@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.express as px
 
+from pages.charts.chart_theme import apply_streamlit_chart_layout
+
 SAVINGS_COLORS = {
     "Total FV": "#00A878",
     "FV Annuity": "#2D9CDB",
@@ -48,48 +50,5 @@ def savings_over_time_chart(df: pd.DataFrame):
             marker=dict(size=7, line=dict(width=2, color="#FFFFFF")),
         )
     )
-    fig.update_layout(
-        template="plotly_white",
-        title=dict(
-            text="Savings Over Time",
-            font=dict(size=24, color="#111827"),
-            x=0.02,
-            xanchor="left",
-        ),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#FBFCFD",
-        font=dict(color="#1F2937", family="Inter, Arial, sans-serif"),
-        hovermode="x unified",
-        legend=dict(
-            title=None,
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            bgcolor="rgba(255,255,255,0)",
-            font=dict(size=12),
-        ),
-        margin=dict(l=24, r=24, t=86, b=48),
-        xaxis=dict(
-            showgrid=False,
-            zeroline=False,
-            linecolor="rgba(17, 24, 39, 0.16)",
-            tickfont=dict(color="rgba(17, 24, 39, 0.68)"),
-            title=dict(font=dict(color="rgba(17, 24, 39, 0.72)")),
-        ),
-        yaxis=dict(
-            gridcolor="rgba(17, 24, 39, 0.08)",
-            zeroline=False,
-            tickprefix="€",
-            tickformat=",.0f",
-            tickfont=dict(color="rgba(17, 24, 39, 0.68)"),
-            title=dict(font=dict(color="rgba(17, 24, 39, 0.72)")),
-        ),
-        hoverlabel=dict(
-            bgcolor="#FFFFFF",
-            bordercolor="rgba(17, 24, 39, 0.12)",
-            font=dict(color="#111827"),
-        ),
-    )
+    apply_streamlit_chart_layout(fig, "Savings Over Time")
     return fig
