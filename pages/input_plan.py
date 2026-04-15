@@ -23,12 +23,12 @@ from pages.components.summary_cards import (
 
 
 st.set_page_config(
-    page_title="Future Savings Planner",
+    page_title="Wealth Planner",
     page_icon="💰",
     layout="wide"
 )
 
-st.title("Future Savings Planner")
+st.title("Wealth Planner")
 st.caption("Play with monthly savings, lump sums, interest rates etc to see how your wealth can grow.")
 
 # ---- USER INPUTS ----
