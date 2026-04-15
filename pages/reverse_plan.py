@@ -3,6 +3,11 @@ import streamlit as st
 from millify import millify
 
 from pages.calculations.reverse_savings import reverse_engineer_fixed_amount
+from pages.components.input_panel import (
+    inject_input_panel_styles,
+    input_panel_header,
+    input_section_title,
+)
 from pages.components.summary_cards import (
     inject_summary_styles,
     summary_card,
@@ -12,14 +17,38 @@ from pages.components.summary_cards import (
 st.title("Reverse Engineer Savings")
 
 # ---- USER INPUTS ----
-col1, col2, col3 = st.columns(3)
+inject_input_panel_styles()
+input_panel_header(
+    "Assumptions",
+    "Define the savings target",
+    "Set the amount you want to reach, the expected return, and the time available to save.",
+)
 
-with col1:
-    FV = st.number_input("Desired total amount", value=650000, min_value = 0)
-with col2:    
-    r = st.number_input("Annual expected interest rate (%)", value=5, min_value = 0)
-with col3:
-    t = st.number_input("Number of years to save", value=30,  min_value = 0)
+with st.container(border=True):
+    input_section_title("Target assumptions")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        FV = st.number_input(
+            "Target amount",
+            value=650000,
+            min_value=0,
+            help="The total savings amount you want to reach.",
+        )
+    with col2:
+        r = st.number_input(
+            "Expected return (%)",
+            value=5,
+            min_value=0,
+            help="Average yearly return assumption.",
+        )
+    with col3:
+        t = st.number_input(
+            "Saving period (years)",
+            value=30,
+            min_value=0,
+            help="How many years you have to reach the target.",
+        )
 
 @st.cache_data
 def cached_reverse_engineer_fixed_amount(

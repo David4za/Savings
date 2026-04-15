@@ -4,6 +4,11 @@ from millify import millify
 
 from pages.calculations.withdrawals import withdraw_analysis
 from pages.charts.withdrawal_charts import balance_by_year_chart
+from pages.components.input_panel import (
+    inject_input_panel_styles,
+    input_panel_header,
+    input_section_title,
+)
 from pages.components.summary_cards import (
     inject_summary_styles,
     summary_card,
@@ -12,15 +17,46 @@ from pages.components.summary_cards import (
 
 st.title("Withdraw Plan")
 
-col1, col2, col3 = st.columns(3)
+# ---- USER INPUTS ----
+inject_input_panel_styles()
+input_panel_header(
+    "Assumptions",
+    "Model the withdrawal plan",
+    "Set your starting balance, monthly withdrawal, expected return, and inflation assumption.",
+)
 
-with col1:
-    withdraw = st.number_input("Monthly withdrawal amount", value=2000, min_value=0)
-    FV = st.number_input("Total Savings", value=500000, min_value=0)
-with col2:
-    r = st.number_input("Annual expected interest rate (%)", value=2, min_value = 0)
-with col3:
-    inflation = st.number_input("Annual inflation rate (%)", value=2,  min_value= 0)
+with st.container(border=True):
+    input_section_title("Withdrawal assumptions")
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        withdraw = st.number_input(
+            "Monthly withdrawal",
+            value=2000,
+            min_value=0,
+            help="The fixed amount withdrawn each month.",
+        )
+    with col2:
+        FV = st.number_input(
+            "Starting savings",
+            value=500000,
+            min_value=0,
+            help="The total savings available at the start of the plan.",
+        )
+    with col3:
+        r = st.number_input(
+            "Expected return (%)",
+            value=2,
+            min_value=0,
+            help="Average yearly return assumption.",
+        )
+    with col4:
+        inflation = st.number_input(
+            "Inflation rate (%)",
+            value=2,
+            min_value=0,
+            help="Annual inflation assumption used in the drawdown model.",
+        )
 
 @st.cache_data
 def cached_withdraw_analysis(

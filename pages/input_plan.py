@@ -9,6 +9,12 @@ from pages.calculations.future_savings import (
     total_contributions,
 )
 from pages.charts.savings_charts import savings_over_time_chart
+from pages.components.input_panel import (
+    inject_input_panel_styles,
+    input_helper,
+    input_panel_header,
+    input_section_title,
+)
 from pages.components.summary_cards import (
     inject_summary_styles,
     summary_card,
@@ -26,74 +32,84 @@ st.title("Future Savings Planner")
 st.caption("Play with monthly savings, lump sums, interest rates etc to see how your wealth can grow.")
 
 # ---- USER INPUTS ----
-with st.container():
-    st.markdown("### Assumptions")
-    st.write("Adjust the inputs to model your future savings")
-    with st.expander("Investment Inputs", expanded=True):
-        col1, col2, col3 = st.columns(3)
+inject_input_panel_styles()
+input_panel_header(
+    "Assumptions",
+    "Build the savings scenario",
+    "Set your recurring savings, expected growth, time horizon, and optional one-off deposits.",
+)
 
-        with col1:
-            P = st.number_input(
-                "Fixed amount to save per month", 
-                value=400,
-                min_value = 0,
-                step=50,
-                help="How much do you plan to save monthly"
-                )
-        with col2:    
-            r = st.number_input(
-                "Annual expected interest rate (%)", 
-                value=7,
-                min_value = 0,
-                max_value=30,
-                help="Average yearly return (currently roughly 7%)"
-                )
-            t = st.number_input(
-                "Number of years",
-                value=30,
-                min_value = 0,
-                help="Number years you are planning to save"
-                )
-        with col3:
-            inflation = st.number_input(
-                "Annual inflationrate (%)", 
-                value=2,
-                min_value=0,
-                max_value=15,
-                help="Used to calculate inflation-adjust value (Governemnts aim for 2% p/y)"
-                )
-        st.markdown("#### Lump sums")
-        st.caption("Add optional one-off deposits. A lump sum added after 20 years in a 30-year plan grows for the final 10 years.")
-        lump_sum_count = st.number_input(
-            "Number of lump sums",
-            value=1,
+with st.container(border=True):
+    input_section_title("Core assumptions")
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        P = st.number_input(
+            "Monthly saving",
+            value=400,
             min_value=0,
-            max_value=20,
-            step=1,
-            help="Set this to 0 if you do not plan any one-off deposits.",
+            step=50,
+            help="How much you plan to save each month.",
         )
-        lump_sums = []
+    with col2:
+        r = st.number_input(
+            "Expected return (%)",
+            value=7,
+            min_value=0,
+            max_value=30,
+            help="Average yearly return assumption.",
+        )
+    with col3:
+        t = st.number_input(
+            "Saving period (years)",
+            value=30,
+            min_value=0,
+            help="How many years you plan to save.",
+        )
+    with col4:
+        inflation = st.number_input(
+            "Inflation rate (%)",
+            value=2,
+            min_value=0,
+            max_value=15,
+            help="Used to estimate the inflation-adjusted value.",
+        )
 
-        for lump_sum_index in range(lump_sum_count):
-            amount_col, year_col = st.columns(2)
-            with amount_col:
-                lump_sum_amount = st.number_input(
-                    f"Lump sum {lump_sum_index + 1} amount",
-                    min_value=0,
-                    step=500,
-                    key=f"lump_sum_amount_{lump_sum_index}",
-                )
-            with year_col:
-                years_from_now = st.number_input(
-                    f"Add after year",
-                    min_value=0,
-                    max_value=t,
-                    step=1,
-                    key=f"lump_sum_year_{lump_sum_index}",
-                    help="Use 0 if this amount is invested today.",
-                )
-            if lump_sum_amount > 0:
-                lump_sums.append((float(lump_sum_amount), int(years_from_now)))
+with st.container(border=True):
+    input_section_title("One-off deposits")
+    input_helper(
+        "Add optional lump sums. A deposit after 20 years in a 30-year plan grows for the final 10 years."
+    )
+    lump_sum_count = st.number_input(
+        "Number of lump sums",
+        value=1,
+        min_value=0,
+        max_value=20,
+        step=1,
+        help="Set this to 0 if you do not plan any one-off deposits.",
+    )
+    lump_sums = []
+
+    for lump_sum_index in range(lump_sum_count):
+        amount_col, year_col = st.columns(2)
+        with amount_col:
+            lump_sum_amount = st.number_input(
+                f"Lump sum {lump_sum_index + 1} amount",
+                min_value=0,
+                step=500,
+                key=f"lump_sum_amount_{lump_sum_index}",
+            )
+        with year_col:
+            years_from_now = st.number_input(
+                "Add after year",
+                min_value=0,
+                max_value=t,
+                step=1,
+                key=f"lump_sum_year_{lump_sum_index}",
+                help="Use 0 if this amount is invested today.",
+            )
+        if lump_sum_amount > 0:
+            lump_sums.append((float(lump_sum_amount), int(years_from_now)))
 
 @st.cache_data
 def cached_future_value_annuity(
