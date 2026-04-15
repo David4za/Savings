@@ -3,9 +3,9 @@
 }
 
 .summary-card {
-    --summary-bg: var(--background-color, #FFFFFF);
-    --summary-surface: var(--secondary-background-color, #F8FAFC);
-    --summary-text: var(--text-color, #111827);
+    --summary-bg: #FFFFFF;
+    --summary-surface: #F8FAFC;
+    --summary-text: currentColor;
     --summary-muted: rgba(17, 24, 39, 0.7);
     --summary-faint: rgba(17, 24, 39, 0.08);
     min-height: 152px;
@@ -20,31 +20,24 @@
     overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
+@supports (color: light-dark(#000, #fff)) {
     .summary-card {
-        --summary-bg: var(--background-color, #0E1117);
-        --summary-surface: var(--secondary-background-color, #1F2937);
-        --summary-text: var(--text-color, #FAFAFA);
-        --summary-muted: rgba(250, 250, 250, 0.72);
-        --summary-faint: rgba(250, 250, 250, 0.12);
-        background:
-            linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
-            linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(17, 24, 39, 0.92));
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+        --summary-bg: light-dark(#FFFFFF, #0E1117);
+        --summary-surface: light-dark(#F8FAFC, #1F2937);
+        box-shadow: 0 16px 34px light-dark(rgba(17, 24, 39, 0.08), rgba(0, 0, 0, 0.22));
     }
 }
 
 @supports (background: color-mix(in srgb, #000 50%, #fff)) {
     .summary-card {
-        --summary-muted: color-mix(in srgb, var(--summary-text) 68%, transparent);
-        --summary-faint: color-mix(in srgb, var(--summary-text) 10%, transparent);
+        --summary-muted: color-mix(in srgb, currentColor 68%, transparent);
+        --summary-faint: color-mix(in srgb, currentColor 10%, transparent);
         background:
             linear-gradient(
                 145deg,
                 color-mix(in srgb, var(--accent-color) 11%, var(--summary-surface)),
                 color-mix(in srgb, var(--accent-color) 3%, var(--summary-bg))
             );
-        box-shadow: 0 16px 34px color-mix(in srgb, var(--summary-text) 8%, transparent);
     }
 }
 
