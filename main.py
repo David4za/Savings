@@ -21,10 +21,17 @@ withdraw_plan = st.Page(
     icon=":material/payments:"
 )
 
+math_overview = st.Page(
+    page=r"pages/math_overview.py",
+    title="How the math works",
+    icon=":material/functions:",
+)
+
 # ---- PAGE NAVIGATION ----
 
 pg = st.navigation({
-    "Plans":[fixed_plan, reverse_plan, withdraw_plan]
+    "Plans": [fixed_plan, reverse_plan, withdraw_plan],
+    "Reference": [math_overview],
 })
 
 pg.run()
